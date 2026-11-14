@@ -17,6 +17,9 @@
 // the top 24 by market cap are carried separately so the reader can see the
 // market's own values next to the model's.
 
+import { summarizeBoard } from './summary.ts';
+import type { BoardSummary } from './summary.ts';
+
 /** The snapshot's protocol entry: exactly the ten fields the sealed input carries. */
 export interface SnapshotProtocol {
   slug: string;
@@ -145,6 +148,8 @@ export interface RadarData {
   board_size: number;
   early_size: number;
   live_size: number;
+  /** The board's shape in a few numbers: head, middle, bands, ages and categories. */
+  summary: BoardSummary;
   rows: RadarRow[];
   live: LiveRow[];
 }
@@ -422,6 +427,7 @@ export function buildRadar(snapshot: Snapshot, model: ModelConstants = MODEL): {
     board_size: board.length,
     early_size: early,
     live_size: live.length,
+    summary: summarizeBoard(board),
     rows: board.map(radarRow),
     live,
   };

@@ -137,6 +137,32 @@
     );
   }
 
+  function summarySection() {
+    var s = DATA.summary;
+    if (!s) return null;
+    function buckets(title, list, fmt) {
+      return el('div', { class: 'sumcol' },
+        el('h3', { text: title }),
+        el('ul', { class: 'buckets' }, list.map(function (b) {
+          return el('li', null,
+            el('span', { text: b.label }),
+            el('b', { text: fmt ? fmt(b.count) : String(b.count) })
+          );
+        }))
+      );
+    }
+    var topNames = s.top_three.map(function (t) { return '#' + t.rank + ' ' + t.name; }).join(', ');
+    return el('section', { class: 'panel summary' },
+      el('h2', { text: 'The board at a glance' }),
+      el('p', { class: 'sub', text: 'Top three by implied value: ' + topNames + '. Median implied value ' + fmtUsd(s.median_implied_usd) + ' — half the board sits above it, half below.' }),
+      el('div', { class: 'sumgrid' },
+        buckets('By implied value', s.value_bands),
+        buckets('By age with no token', s.age_bands),
+        buckets('By category', s.top_categories)
+      )
+    );
+  }
+
   function controls() {
     var categories = Array.from(new Set(DATA.rows.map(function (r) { return r.category || 'Other'; }))).sort();
     var search = el('input', { type: 'search', id: 'q', placeholder: 'Search name, category or chain', value: state.q, 'aria-label': 'Search the board' });
@@ -307,6 +333,7 @@
     var shell = el('div', { class: 'shell' });
     shell.appendChild(header());
     shell.appendChild(lede());
+    if (state.view === 'board') shell.appendChild(summarySection());
     if (state.view === 'detail' && state.selected) {
       var row = DATA.rows.filter(function (r) { return r.slug === state.selected; })[0];
       if (row) shell.appendChild(detailSection(row));
